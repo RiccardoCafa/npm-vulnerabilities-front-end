@@ -1,17 +1,43 @@
 // Modules to control application life and create native browser window
-const { app, BrowserWindow } = require('electron')
+const { app, BrowserWindow, Menu } = require('electron')
 const path = require('path')
 const isDev = require('electron-is-dev')
 
 const createWindow = () => {
 	// Create the browser window.
 	const mainWindow = new BrowserWindow({
-		frame: false, // removes the frame from the BrowserWindow. It is advised that you either create a custom menu bar or remove this line
 		webPreferences: {
 			devTools: isDev, // toggles whether devtools are available. to use node write window.require('<node-name>')
 			nodeIntegration: true // turn this off if you don't mean to use node
 		}
 	})
+
+	var menu = Menu.buildFromTemplate([
+		{
+			label: 'Menu',
+			click() {
+				mainWindow.loadURL(
+					isDev
+						? 'http://localhost:3000/Home'
+						: `file://${path.join(__dirname, '../build/index.html')}`
+				)
+			}
+		},
+		{
+			label: 'Framework'
+		},
+		{
+			label: 'NPM Vulns'
+		},
+		{
+			label: 'Exit',
+			click() {
+				app.quit();
+			}
+		}
+	])
+
+	Menu.setApplicationMenu(menu);
 
 	// load the index.html of the app. (or localhost on port 3000 if you're in development)
 	mainWindow.loadURL(
