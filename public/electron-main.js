@@ -24,7 +24,14 @@ const createWindow = () => {
 			}
 		},
 		{
-			label: 'Framework'
+			label: 'Framework',
+			click() {
+				mainWindow.loadURL(
+					isDev
+						? 'http://localhost:3000/Cyber'
+						: `file://${path.join(__dirname, '../build/index.html')}`
+				)
+			}
 		},
 		{
 			label: 'NPM Vulns'

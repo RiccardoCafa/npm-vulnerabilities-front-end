@@ -2,6 +2,7 @@ import '../Sass/App.sass';
 // React
 import React from 'react';
 import Home from './pages/Home';
+import Cyber from './pages/CyberMenu';
 
 import {
 	BrowserRouter as Router,
@@ -18,8 +19,11 @@ export default function App() {
 			{/* A <Switch> looks through its children <Route>s and
 				renders the first one that matches the current URL. */}
 			<Switch>
-				<Route path="/Home">
+				<Route exact path="/">
 					<Home />
+				</Route>
+				<Route path="/Cyber">
+					<Cyber></Cyber>
 				</Route>
 			</Switch>
 		</div>
