@@ -8,7 +8,7 @@ export default function CyberMenu() {
     const [key, setKey] = useState('');
 
     function startCyberClick() {
-        console.log(key);
+        // console.log(key);
     }
 
     function yourKeyOnChange(e: HTMLInputElement) {

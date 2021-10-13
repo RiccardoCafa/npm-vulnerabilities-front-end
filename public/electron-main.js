@@ -1,10 +1,12 @@
 // Modules to control application life and create native browser window
+
 const { app, BrowserWindow, Menu } = require('electron')
 const path = require('path')
 const isDev = require('electron-is-dev')
 
 const createWindow = () => {
 	// Create the browser window.
+
 	const mainWindow = new BrowserWindow({
 		webPreferences: {
 			devTools: isDev, // toggles whether devtools are available. to use node write window.require('<node-name>')
@@ -14,11 +16,11 @@ const createWindow = () => {
 
 	var menu = Menu.buildFromTemplate([
 		{
-			label: 'Menu',
+			label: 'Home',
 			click() {
 				mainWindow.loadURL(
 					isDev
-						? 'http://localhost:3000/Home'
+						? 'http://localhost:3000/'
 						: `file://${path.join(__dirname, '../build/index.html')}`
 				)
 			}
@@ -34,7 +36,14 @@ const createWindow = () => {
 			}
 		},
 		{
-			label: 'NPM Vulns'
+			label: 'NPM Vulns',
+			click() {
+				mainWindow.loadURL(
+					isDev
+						? 'http://localhost:3000/npm'
+						: `file://${path.join(__dirname, '../build/index.html')}`
+				)
+			}
 		},
 		{
 			label: 'Exit',
