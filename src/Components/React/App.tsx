@@ -35,7 +35,7 @@ export default function App() {
 					<Route path="/npm">
 						<Npm></Npm>
 					</Route>
-					<Route path="/npmdiscover">
+					<Route path="/npmdiscover/:apiKey?">
 						<NpmDiscover></NpmDiscover>
 					</Route>
 				</Switch>

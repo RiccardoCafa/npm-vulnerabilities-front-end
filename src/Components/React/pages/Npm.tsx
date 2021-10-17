@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {
     FormControl,
     FormLabel,
@@ -21,12 +21,26 @@ import '../../Sass/pages/Npm.sass';
 export default function Npm() {
     const { colorMode } = useColorMode();
 
+    const [apiKey, setApiKey] = useState('');
+
     const buttonBackground = useColorModeValue("gray.100", "gray.700");
 
     const history = useHistory();
 
     function goTo(path: string) {
         history.push(path);
+    }
+
+    function goToWithKey(target: React.MouseEvent<HTMLButtonElement, MouseEvent>, path: string) {
+        target.preventDefault();
+        history.push(`${path}/${apiKey}`);
+        // `${path}?apiKey=${apiKey}`
+    }
+
+    function setApiKeyOnChange(event: React.ChangeEvent<HTMLInputElement>) {
+        var key: string = event.target.value;
+
+        setApiKey(key);
     }
 
     return(
@@ -45,9 +59,9 @@ export default function Npm() {
                 <FormLabel style={{fontWeight: 'lighter', fontSize: '.8em', marginTop: '2em'}}>Already has a vulnerability discover on going? Use your key to see the results</FormLabel>
                 <FormLabel style={{fontWeight: 'bold'}}>Key</FormLabel>
                 <Flex direction={'row'}>
-                    <Input placeholder="abcde-12345-abcde-12345" style={{marginRight: '1em'}} />
+                    <Input placeholder="000a0000-a00a-00a0-a000-000000000000" onChange={(e) => setApiKeyOnChange(e)} style={{marginRight: '1em'}} />
                     <Tooltip label="Search this key">
-                        <IconButton aria-label="Search database" icon={<SearchIcon />} />
+                        <IconButton aria-label="Search database" icon={<SearchIcon />} type='submit' onClick={(e) => goToWithKey(e, 'npmdiscover')} />
                     </Tooltip>
                 </Flex>
             </FormControl>
