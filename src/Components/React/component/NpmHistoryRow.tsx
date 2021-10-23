@@ -6,6 +6,8 @@ import {
 
 import {npmHistory} from '../data/npmStatus';
 import StatusBadge from './StatusBadge';
+import {VulnerabilityStats} from './NpmResult';
+
 
 export default function NpmHistoryRow({historia}: {historia: npmHistory}) {
 
@@ -18,12 +20,19 @@ export default function NpmHistoryRow({historia}: {historia: npmHistory}) {
                 <Td>{historia.application}</Td>
                 <Td>{historia.totalVulnerability}</Td>
                 <Td><StatusBadge status={historia.status}></StatusBadge></Td>
-                {historia.totalVulnerability > 0 ? <Td><Button colorScheme={'purple'} onClick={setShow.toggle}>Show</Button></Td> : <Td></Td>}
+                {historia.totalVulnerability > 0 ? 
+                    <Td>
+                        <Button colorScheme={'purple'} onClick={setShow.toggle}>{!show ? "Show" : "Hide"}</Button>
+                    </Td> 
+                    : <Td></Td>
+                }
             </Tr>
             {show ?
-                 <Text>
-                     Some value here
-                 </Text>
+            <Tr>
+                <Td colSpan={5}>
+                    <VulnerabilityStats result={historia.result}></VulnerabilityStats>
+                </Td>
+            </Tr>
             : ""}
         </>
     )

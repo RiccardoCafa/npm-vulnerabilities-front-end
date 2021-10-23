@@ -86,11 +86,10 @@ export default function Npm(props: any) {
             // TODO check cache if there is one stored, otherwise push to keyselection 
             history.push('keyselection/npm');
         }
-
-        // get history from API
-        setProcessHistory(processHistoryMock)
-
+        
         // setProcess(processMock);
+
+        getHistory();
     }, []);
 
     useEffect(() => {
@@ -100,7 +99,6 @@ export default function Npm(props: any) {
                 
         obj.result = JSON.parse(obj.result);
 
-        console.log(process);
         const tmp = [...process];
 
         // Find item index using _.findIndex (thanks @AJ Richardson for comment)
@@ -113,9 +111,6 @@ export default function Npm(props: any) {
         }
 
         setProcess(tmp);
-
-        console.log(process);
-        console.log(tmp);
     }, [received])
 
     const files = acceptedFiles.map(file => (
@@ -147,30 +142,38 @@ export default function Npm(props: any) {
         });
     }
     
+    function getHistory() {
+        setProcessHistory(processHistoryMock);
+    }
+
+    function BackToNpmVuln() {
+        setProcess([]);
+        getHistory();
+    }
+
     return (
         <Flex align='center' justify='center' direction='column'>
             <Flex className="container" flexDirection={'column'} style={{marginTop: '3em', maxWidth: '80vh'}} >
             {
                 process.length == 0 ? 
                     <>
-                    {
-                        processHistory && processHistory.length > 0 ?
-                        <>
-                            <Heading size={'md'} style={{textTransform: 'uppercase'}}>npm vulnerabilities history</Heading>
-                            <NpmHistoryTable histories={processHistory}></NpmHistoryTable>
-                            <Divider style={{marginTop: '1em', marginBottom: '2em'}}></Divider>
-                        </>
-                        : ""
-                    }
+                        <Heading size={'md'} style={{textTransform: 'uppercase', marginBottom: '1em'}}>check for vulnerabilities</Heading>
                         <div {...getRootProps({className: 'dropzone-container'})}>
                             <input {...getInputProps()} />
                             <p>Drag 'n' drop some files here, or click to select files</p>
                         </div>
                         <aside>
-                            <h4>Files</h4>
-                            <List>
-                                {files}
-                            </List>
+                            {
+                                files.length > 0 ?
+                                    <>
+                                        <Heading size={'sm'}>Files</Heading>
+                                        <List>
+                                            {files}
+                                        </List>
+                                    </>
+                                : <Text>Only packages.json file format</Text>
+                            }
+                            
                             <Button
                                 mt={4}
                                 // isLoading={props.isSubmitting}
@@ -181,6 +184,15 @@ export default function Npm(props: any) {
                                 send packages to analyse
                             </Button>
                         </aside>
+                        {
+                            processHistory && processHistory.length > 0 ?
+                            <>
+                                <Divider style={{marginTop: '2em', marginBottom: '2em'}}></Divider>
+                                <Heading size={'md'} style={{textTransform: 'uppercase'}}>npm vulnerabilities history</Heading>
+                                <NpmHistoryTable histories={processHistory}></NpmHistoryTable>
+                            </>
+                            : ""
+                        }
                     </>
                     :
                     <>
@@ -219,10 +231,11 @@ export default function Npm(props: any) {
                                     <Divider></Divider>
                                 </>
                                 } else {
-                                    return <NpmResult p={p}></NpmResult>
+                                    return <NpmResult p={p} showStatus={true}></NpmResult>
                                 }
                             }
                         })}
+                        <Button size={'sm'} onClick={BackToNpmVuln} style={{marginBottom: '2em'}}>Back to npm vulnerabilities</Button>
                     </>
             }
             </Flex>
