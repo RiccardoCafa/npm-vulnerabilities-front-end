@@ -30,7 +30,7 @@ const createWindow = () => {
 			click() {
 				mainWindow.loadURL(
 					isDev
-						? 'http://localhost:3000/Cyber'
+						? 'http://localhost:3000/keyselection/cyber'
 						: `file://${path.join(__dirname, '../build/index.html')}`
 				)
 			}
@@ -40,7 +40,7 @@ const createWindow = () => {
 			click() {
 				mainWindow.loadURL(
 					isDev
-						? 'http://localhost:3000/npm'
+						? 'http://localhost:3000/keyselection/npm'
 						: `file://${path.join(__dirname, '../build/index.html')}`
 				)
 			}

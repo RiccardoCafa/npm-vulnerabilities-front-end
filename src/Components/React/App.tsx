@@ -2,9 +2,9 @@ import '../Sass/App.sass';
 // React
 import React from 'react';
 import Home from './pages/Home';
-import Cyber from './pages/CyberMenu';
+import Cyber from './pages/CyberFramework';
+import KeySelection from './pages/KeySelection';
 import Npm from './pages/Npm';
-import NpmDiscover from './pages/NpmDiscover';
 
 import { ChakraProvider } from "@chakra-ui/react"
 
@@ -29,14 +29,14 @@ export default function App() {
 					<Route exact path="/">
 						<Home />
 					</Route>
-					<Route path="/cyber">
+					<Route path="/keyselection/:flow">
+						<KeySelection></KeySelection>
+					</Route>
+					<Route path="/cyber/:apiKey">
 						<Cyber></Cyber>
 					</Route>
-					<Route path="/npm">
+					<Route path="/npm/:apiKey?">
 						<Npm></Npm>
-					</Route>
-					<Route path="/npmdiscover/:apiKey?">
-						<NpmDiscover></NpmDiscover>
 					</Route>
 				</Switch>
 			</div>
