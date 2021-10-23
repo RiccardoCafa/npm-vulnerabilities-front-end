@@ -1,0 +1,110 @@
+[
+        {
+            "application": null,
+            "id": null,
+            "result": "Invalid JSON",
+            "status": "failed"
+        },
+        {
+            "application": "venda-carros-automaticos",
+            "id": "aff928c8-3054-44a4-abfd-bb86cd287d06",
+            "result": null,
+            "status": "scheduled"
+        },
+        {
+            "application": "half-pugg",
+            "id": "1e3270ec-e3a1-476b-bf24-2efb20a0aaba",
+            "result": null,
+            "status": "scheduled"
+        },
+        {
+            "application": "selah-joalheria",
+            "id": "0fb5d69d-8dd5-4e4b-abbd-7a13d429b2a0",
+            "result": {
+              "packages": [
+                "react-scripts",
+                "ansi-html",
+                "jest-jasmine2",
+                "nanomatch",
+                "jest-snapshot",
+                "braces",
+                "browserslist",
+                "@jest/reporters",
+                "cliui",
+                "readdirp",
+                "jest-cli",
+                "immer",
+                "webpack",
+                "jest-haste-map",
+                "cssnano",
+                "wrap-ansi",
+                "@jest/transform",
+                "@svgr/webpack",
+                "@jest/core",
+                "strip-ansi",
+                "glob-parent",
+                "optimize-css-assets-webpack-plugin",
+                "ansi-regex",
+                "postcss-svgo",
+                "cssnano-preset-default",
+                "watchpack",
+                "css-select",
+                "cache-base",
+                "jest-resolve-dependencies",
+                "jest",
+                "set-value",
+                "yargs",
+                "micromatch",
+                "sane",
+                "@svgr/plugin-svgo",
+                "union-value",
+                "webpack-dev-server",
+                "watchpack-chokidar2",
+                "base",
+                "jest-circus",
+                "chokidar",
+                "fork-ts-checker-webpack-plugin",
+                "@pmmmwh/react-refresh-webpack-plugin",
+                "babel-jest",
+                "@jest/test-sequencer",
+                "svgo",
+                "nth-check",
+                "jest-runner",
+                "jest-config",
+                "react-dev-utils",
+                "jest-runtime",
+                "expand-brackets",
+                "anymatch",
+                "string-width",
+                "extglob",
+                "snapdragon",
+                "http-proxy-middleware"
+              ],
+              "vulnerabilities": {
+                "critical": 2,
+                "high": 39,
+                "info": 0,
+                "low": 0,
+                "moderate": 16,
+                "total": 57
+              }
+            },
+            "status": "vulnerable"
+        },
+        {
+            "application": "selah-joalheria",
+            "id": "0fb5d69d-8dd5-4e4b-abbd-7a13d429b2a0",
+            "result": {
+              "packages": [],
+              "vulnerabilities": {
+                "critical": 0,
+                "high": 0,
+                "info": 0,
+                "low": 0,
+                "moderate": 0,
+                "total": 0
+              }
+            },
+            "status": "ok"
+        }
+    ]
