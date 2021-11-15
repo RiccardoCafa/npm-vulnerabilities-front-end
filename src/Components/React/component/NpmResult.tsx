@@ -70,13 +70,13 @@ total: 0
         <Flex style={{marginBottom: '1.5em', marginTop: '1.5em'}}>
             <Box ml="3">
                 <Text fontSize='2em' fontWeight="bold">
-                    <b>{p.id}</b>
+                    <b>{p.application}</b>
                     {showStatus ?
                         <StatusBadge status={p.status}></StatusBadge> 
                         : ""
                     }
                 </Text>
-                <Text style={{marginBottom: '1.5em'}}>Aplicação: <b>{p.application}</b></Text>
+                <Text style={{marginBottom: '1.5em'}}>Id: <b>{p.id}</b></Text>
                 <VulnerabilityStats result={p.result}></VulnerabilityStats>
             </Box>
         </Flex>

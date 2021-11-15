@@ -103,11 +103,16 @@ export default function FwQuestion({data, color, myIndex, currentTabIndex}: {dat
 
     function skipQuestion() {
         currentQuestion.skipped = true;
+        setCurrentQuestion({
+            ...currentQuestion,
+            skipped: true
+        });
         goToQuestion((currentIndex + 2).toString());
     }
 
     function answerQuestion() {
         currentQuestion.skipped = false;
+        setCurrentQuestion(currentQuestion);
         setSkippedAnswer.on();
     }
 

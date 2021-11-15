@@ -87,9 +87,32 @@ export default function Npm(props: any) {
             history.push('keyselection/npm');
         }
         
+        const config = {
+            headers: {
+                'x-Api-Key': params.apiKey
+            }
+        }
+
+        console.log(params.apiKey)
+
+        axios.get("http://localhost:4000/npm", config).then(resp => {
+            var data: npmStatus[] = resp.data as npmStatus[];
+            var dataAsHistory: npmHistory[] = [];
+
+            data.map(npm => {
+                dataAsHistory.push({
+                    ...npm,
+                    totalVulnerability: npm.result?.length
+                })
+            });
+
+            console.log(dataAsHistory);
+
+            setProcessHistory(dataAsHistory);
+        })
         // setProcess(processMock);
 
-        getHistory();
+        // getHistory();
     }, []);
 
     useEffect(() => {
@@ -136,14 +159,14 @@ export default function Npm(props: any) {
         }
 
         axios.post(url, formData, config).then(resp => {
-            console.log(resp.data);
+            // console.log(resp.data);
             var data: npmStatus[] = resp.data as npmStatus[];
             setProcess(data);
         });
     }
     
     function getHistory() {
-        setProcessHistory(processHistoryMock);
+        //setProcessHistory(processHistoryMock);
     }
 
     function BackToNpmVuln() {
@@ -204,9 +227,6 @@ export default function Npm(props: any) {
                                             <Text fontSize='2em' fontWeight="bold">
                                             {p.result}
                                                 <StatusBadge status={p.status}></StatusBadge>
-                                                {/* <Badge ml="1" colorScheme="red">
-                                                    {p.status}
-                                                </Badge> */}
                                             </Text>
                                         </Box>
                                     </Flex>
@@ -218,13 +238,13 @@ export default function Npm(props: any) {
                                     <Flex style={{marginBottom: '1.5em', marginTop: '1.5em'}}>
                                         <Box ml="3">
                                             <Text fontSize='2em' fontWeight="bold">
-                                            Processando
+                                            {p.application}
                                                 <StatusBadge status={p.status}></StatusBadge>
                                                 {/* <Badge ml="1" colorScheme="yellow">
                                                     {p.status}
                                                 </Badge> */}
                                             </Text>
-                                            <Text style={{marginBottom: '1em'}}>Aplicação: <b>{p.application}</b></Text>
+                                            <Text style={{marginBottom: '1em'}}>Id: <b>{p.id}</b></Text>
                                             <Progress size="xs" isIndeterminate />
                                         </Box>
                                     </Flex>
