@@ -6,19 +6,13 @@ import {
 } from '@chakra-ui/react';
 import fwQuestionData from '../data/fwQuestionData';
 import RatingExplain from './RatingExplain';
-import { Answer } from '../../React/data/userModel';
 
-export default function FwQuestion({data, color, myIndex, currentTabIndex, answers: focusAnswers, updateAnswer}: 
-    {data: fwQuestionData[], color: string, myIndex: number, currentTabIndex: number, answers: Answer[], updateAnswer: (data: fwQuestionData) => void}) {
+export default function FwQuestion({data, color, showPrevious, updateAnswer, goPrevious}: 
+    {data: fwQuestionData, color: string, showPrevious: boolean, updateAnswer: (data: fwQuestionData) => void, goPrevious: () => void}) {
     
-    const [currentIndex, setCurrentIndex] = useState(0);
     const [currentQuestion, setCurrentQuestion] = useState<fwQuestionData>(
         {
-            category: "",
-            content: "",
-            focus: "",
-            id: 1,
-            rate: 2
+            id: 1, category: "", content: "", focus: "", rate: 2
         }
     );
 
@@ -60,54 +54,35 @@ export default function FwQuestion({data, color, myIndex, currentTabIndex, answe
     ];
 
     useEffect(() => {
-        focusAnswers.map((answer, _) => {
-            var question = data.find(x => x.id == answer.id);
-            if (question) {
-                question.skipped = answer.skipped;
-            }
-        });
-
-        if (data.length > 0) {
-            setCurrentQuestion(data[currentIndex]);
+        if(data.skipped) {
+            setSkippedAnswer.on();
+        } else {
+            data.skipped = false;
+            setSkippedAnswer.off();
         }
-
+        
+        setCurrentQuestion(data);
+        setActualValue(data.rate ?? 2);
     }, [data]);
 
-    function goToQuestion(qst: string) {
-        let qstNumber: number = parseInt(qst);
-        qstNumber = qstNumber - 1;
-        if (qstNumber < data.length && qstNumber >= 0) {
-            let currentQst = data[qstNumber];
-            setCurrentIndex(qstNumber);
-            setCurrentQuestion(currentQst);
-            
-            if (currentQst.skipped && currentQst.skipped) {
-                setSkippedAnswer.off();
-            } else {
-                setSkippedAnswer.on();
-            }
-        }
-    }
-
     function skipQuestion() {
-        currentQuestion.skipped = true;
         
-        setCurrentQuestion({
+        var qst: fwQuestionData = {
             ...currentQuestion,
             skipped: true
-        });
-
-        goToQuestion((currentIndex + 2).toString());
+        };
+        
+        updateAnswer(qst);
+        
+        // setCurrentQuestion(qst);
     }
 
-    function answerQuestion() {
+    function removeSkippedStatus() {
         currentQuestion.skipped = false;
         currentQuestion.rate = actualValue;
 
         setCurrentQuestion(currentQuestion);
-        setSkippedAnswer.on();
-
-        updateAnswer(currentQuestion);
+        setSkippedAnswer.off();
     }
 
     function onRatingChange(e: number) {
@@ -115,7 +90,7 @@ export default function FwQuestion({data, color, myIndex, currentTabIndex, answe
     }
 
     function getSlider() {
-        return (<Slider defaultValue={2} min={0} max={5} step={1} onChange={onRatingChange}>
+        return (<Slider defaultValue={2} value={actualValue} min={0} max={5} step={1} onChange={onRatingChange}>
             <SliderTrack bg="red.100">
                 <Box position="relative" />
                 <SliderFilledTrack bg={color} />
@@ -141,12 +116,21 @@ export default function FwQuestion({data, color, myIndex, currentTabIndex, answe
         </Modal>);
     }
 
+    function next() {
+        var qst = currentQuestion;
+
+        qst.rate = actualValue;
+
+        updateAnswer(qst);
+    }
+
+    function previous() {
+        goPrevious();
+    }
+
     return (
         <>
-        {
-            myIndex === currentTabIndex ?
-        
-            <Flex direction={'column'} display={'flex'} justifyContent={'center'} justifyItems={'center'} alignContent={'center'} alignItems={'center'} width={'80%'}>
+            <Flex direction={'column'} display={'flex'} justifyContent={'center'} justifyItems={'center'} alignContent={'center'} alignItems={'center'} width={'100%'} marginTop={'1em'}>
                 <Flex direction={'row'} justifyContent={'space-around'} marginBottom={'2em'}>
                     <Badge colorScheme={color.replace(/\..*$/g, '')} variant={'subtle'} fontWeight={'bold'} fontSize={'x-large'}>{currentQuestion?.category}</Badge>
                 </Flex>
@@ -167,27 +151,25 @@ export default function FwQuestion({data, color, myIndex, currentTabIndex, answe
                     </Link>
                 </Text>
                 <Flex direction={'row'} style={{marginTop: '2em', width: '100%', marginBottom: '2em'}} justifyContent={'space-around'}>
-                    <Button onClick={() => goToQuestion((currentIndex).toString())}>PREVIOUS</Button>
+                    {
+                        showPrevious ?
+                        <Button onClick={() => previous()}>PREVIOUS</Button>
+                        : <></>
+                    }
                     {
                         currentQuestion.skipped ?
-                        <Button onClick={() => answerQuestion()}>ANSWER</Button>
+                        <Button onClick={() => removeSkippedStatus()}>ANSWER</Button>
                         : <Button onClick={() => skipQuestion()}>SKIP</Button>
                     }
-                    <Button onClick={() => goToQuestion((currentIndex + 2).toString())}>{currentQuestion.skipped ? "NEXT" : "ACCEPT"}</Button>
+                    <Button onClick={() => next()}>{currentQuestion.skipped ? "NEXT" : "ACCEPT"}</Button>
                 </Flex>
                 <Flex direction={'row'} width={'50%'} alignContent={'center'} justifyContent={'center'} >
                     <Text marginRight={'1em'}>
-                        Question:
+                        Question #{currentQuestion.id.toString()}
                     </Text>
-                    <Editable width={'10'} defaultValue="0" value={currentQuestion.id.toString()} onChange={(e) => goToQuestion(e)} >
-                        <EditablePreview />
-                        <EditableInput type={'number'} />
-                    </Editable>
                 </Flex>
             </Flex>
-        
-        : <></>}
-        {getInfoModal()}
+            {getInfoModal()}
         </>
     )
 }

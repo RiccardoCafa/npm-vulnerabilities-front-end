@@ -26,44 +26,65 @@ interface RouteParams {
     apiKey: string;
 }
 
+interface QuestionDictionary {
+    [questionId: number]: fwQuestionData;
+}
+
 export default function CyberMenu() {
 
     const [apiKeyValue, setApiKey] = useState('');
     const [questions, setQuestions] = useState<fwQuestionData[]>([]);
+    const [questionsAnswered, setQuestionsAnswered] = useState<QuestionDictionary>({});
     const [currentIndex, setCurrentIndex] = useState(0);
-    
+    const [currentTabIndex, setCurrentTabIndex] = useState(0);
+    const [currentColor, setCurrentColor] = useState('');
+    const [currentQuestion, setCurrentQuestion] = useState<fwQuestionData>({
+        category: '',
+        content: '',
+        focus: '',
+        id: 0
+    });
+
     const { answers, setUserState } = useUser();
 
     const questionTypes = [
         {
+            index: 0,
             focus: "Governance",
             color: "orange.500"
         },
         {
+            index: 1,
             focus: "Identify",
             color: "teal.700"
         },
         {
+            index: 2,
             focus: "Defend",
             color: "purple.700"
         },
         {
+            index: 3,
             focus: "Detect",
             color: "green.500"
         },
         {
+            index: 4,
             focus: "Respond",
             color: "purple.700"
         },
         {
+            index: 5,
             focus: "Recover",
             color: "gray.600"
         },
         {
+            index: 6,
             focus: "Learn",
             color: "blue.500"
         },
         {
+            index: 7,
             focus: "Third Party Providers",
             color: "purple.700"
         }
@@ -89,71 +110,99 @@ export default function CyberMenu() {
             }
         }).then(resp => {
             if (resp.data) {
-                setQuestions(resp.data as fwQuestionData[]);
+                var questions: fwQuestionData[] = resp.data as fwQuestionData[];
+                setQuestions(questions);
+                getCurrentQuestion(questions);
                 console.log('questions: got data from server');
             } else {
                 setQuestions(questionsData);
                 console.log('questions: got data from local server');
             }
         });
-
     }, []);
 
-    function getQuestionByFocus(focus: string): fwQuestionData[] {
-        const quests: fwQuestionData[] = questions.reduce((acc, current) => {
-            if (current.focus.toLowerCase() === focus.toLowerCase()) {
-                acc.push(current);
-            }
-            return acc;
-        }, [] as fwQuestionData[]);
+    useEffect(() => {
+        if (questions.length > 0) {
+            getCurrentQuestion(questions);
+        }
+    }, [currentIndex]);
 
-        if (quests == undefined) {
-            return [];
+    function getCurrentQuestion(data: fwQuestionData[]) {
+        var currentQuestion = data[currentIndex];
+        var color: string | undefined = questionTypes.find(x => x.focus == currentQuestion.focus)?.color;
+
+        var questionAnsw = questionsAnswered[currentQuestion.id];
+
+        if (questionAnsw) {
+            currentQuestion.rate = questionAnsw.rate;
+            currentQuestion.skipped = questionAnsw.skipped;
         }
 
-        return quests as fwQuestionData[];
+        setCurrentColor(color ?? "black");
+        
+        setCurrentQuestion(currentQuestion);
+
+        var index = questionTypes.find(x => x.focus == currentQuestion.focus)?.index;
+        setCurrentTabIndex(index ?? 0);
     }
 
     function onIndexChange(index: number) {
-        setCurrentIndex(index);
+        //setCurrentIndex(index);
+        var focus = questionTypes.find(x => x.index == index)?.focus;
+
+        if (focus) {
+            var firstIndex = questions.findIndex(x => x.focus == focus);
+            setCurrentIndex(firstIndex);
+            setCurrentTabIndex(index);
+        }
     }
 
     function updateQuestion(question: fwQuestionData) {
-        answers[question.id - 1].rate = question.rate ?? 0;
-        answers[question.id - 1].skipped = question.skipped;
+        var questionsAnsw = questionsAnswered;
 
-        setUserState({
-            answers: answers,
-            apiKey: apiKeyValue
-        });
+        var questionToUpdate = questionsAnswered[question.id];
 
-        console.log(answers);
+        if (questionToUpdate) {
+            questionToUpdate.rate = question.rate;
+            questionToUpdate.skipped = question.skipped;
+        } else {
+            questionsAnsw[question.id] = question;
+        }
+
+        setQuestionsAnswered(questionsAnsw);
+        
+        console.log('update question');
+        console.log(questionsAnsw);
+
+        var index = currentIndex + 1;
+
+        if (index < questions.length) {
+            setCurrentIndex(index);
+        }
     }
 
-    function debugQuestion() {
-        console.log(answers);
+    function goPrevious() {
+        var index = currentIndex - 1;
+        if (index >= 0) {
+            setCurrentIndex(index);
+        }
     }
 
     return (
         <>
         <Text style={{fontSize: '.7em', marginLeft: '.2em'}}>Key: {apiKeyValue}</Text>
         <Flex className="Container" style={{width: '100%'}}>
-            <Tabs style={{width: '60vw'}} onChange={onIndexChange}>
-                <TabList style={{alignContent: 'center', justifyContent: 'center'}}>
-                    {questionTypes.map((type, _) => 
-                        <Tab _selected={{ color: "white", bg: type.color }}>{type.focus}</Tab>
-                    )}
-                </TabList>
-                <TabPanels>
-                    {questionTypes.map((type, index) =>
-                        <TabPanel display={'flex'} justifyContent={'center'}>
-                            <FwQuestion data={getQuestionByFocus(type.focus)} color={type.color} myIndex={index} currentTabIndex={currentIndex} 
-                                        answers={answers} updateAnswer={updateQuestion}></FwQuestion>
-                        </TabPanel>
-                    )}
-                </TabPanels>
-            </Tabs>
-            <Button onClick={debugQuestion}></Button>
+            <div style={{display:'flex',flexDirection: 'column', justifyContent:'center'}}>
+                <Tabs style={{width: '60vw'}} index={currentTabIndex} onChange={onIndexChange} isManual>
+                    <TabList style={{alignContent: 'center', justifyContent: 'center'}}>
+                        {questionTypes.map((type, _) => 
+                            <Tab _selected={{ color: "white", bg: type.color }}>{type.focus}</Tab>
+                        )}
+                    </TabList>
+                </Tabs>
+                <FwQuestion data={currentQuestion} color={currentColor} showPrevious={currentIndex > 0} updateAnswer={updateQuestion} goPrevious={goPrevious}></FwQuestion>    
+            </div>
+            {/* <Button onClick={debugQuestion}></Button> */}
         </Flex>
         </>
     )
