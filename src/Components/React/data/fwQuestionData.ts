@@ -1,7 +1,8 @@
 export default interface fwQuestionData {
+    id: number;
     focus: string;
     category: string;
     content: string;
-    number: number;
     skipped?: boolean;
+    rate?: number;
 }

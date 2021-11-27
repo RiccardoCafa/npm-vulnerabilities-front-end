@@ -64,52 +64,14 @@ export default function Npm(props: any) {
         setApiKey(params.apiKey);
 
         if (params.apiKey) {
-            let socket: Socket = new Socket("ws://localhost:4000/socket");
-            socket.connect();
-
-            let channel = socket.channel(`npm:${params.apiKey}`, {});
-            channel.join()
-                .receive("ok", resp => {
-                    console.log("success on receive", resp);
-                })
-                .receive("error", resp => {
-                    console.log("Unable to join", resp);
-                });
-
-            channel.on("result", payload => {
-                console.log("Got message", payload);
-                // payload.result = JSON.parse(payload.result);
-                setReceived(payload);
-                // SetProcessFromSocket(payload);
-            })
+            registerSocket(params);
         } else {
             // TODO check cache if there is one stored, otherwise push to keyselection 
             history.push('keyselection/npm');
         }
-        
-        const config = {
-            headers: {
-                'x-Api-Key': params.apiKey
-            }
-        }
 
-        console.log(params.apiKey)
+        getNpmHistory();
 
-        axios.get("http://localhost:4000/npm", config).then(resp => {
-            var data: npmStatus[] = resp.data as npmStatus[];
-            var dataAsHistory: npmHistory[] = [];
-
-            data.map(npm => {
-                dataAsHistory.push({
-                    ...npm,
-                    totalVulnerability: npm.result?.length
-                })
-            });
-
-            console.log(dataAsHistory);
-
-            setProcessHistory(dataAsHistory);
-        })
         // setProcess(processMock);
 
         // getHistory();
@@ -135,6 +97,46 @@ export default function Npm(props: any) {
 
         setProcess(tmp);
     }, [received])
+
+    function getNpmHistory() {
+        const config = {
+            headers: {
+                'x-Api-Key': params.apiKey
+            }
+        }
+
+        axios.get("http://localhost:4000/npm", config).then(resp => {
+            var data: npmStatus[] = resp.data as npmStatus[];
+            var dataAsHistory: npmHistory[] = [];
+
+            data.map(npm => {
+                dataAsHistory.push({
+                    ...npm,
+                    totalVulnerability: npm.result?.length
+                })
+            });
+
+            setProcessHistory(dataAsHistory);
+        })
+    }
+
+    function registerSocket(params: RouteParams) {
+        let socket: Socket = new Socket("ws://localhost:4000/socket");
+        socket.connect();
+
+        let channel = socket.channel(`npm:${params.apiKey}`, {});
+        channel.join()
+            .receive("ok", resp => {
+                console.log("success on receive", resp);
+            })
+            .receive("error", resp => {
+                console.log("Unable to join", resp);
+            });
+
+        channel.on("result", payload => {
+            setReceived(payload);
+        });
+    }
 
     const files = acceptedFiles.map(file => (
         <ListItem key={file.name}>
@@ -176,6 +178,7 @@ export default function Npm(props: any) {
 
     return (
         <Flex align='center' justify='center' direction='column'>
+            <Text>{apiKey}</Text>
             <Flex className="container" flexDirection={'column'} style={{marginTop: '3em', maxWidth: '80vh'}} >
             {
                 process.length == 0 ? 
@@ -220,40 +223,7 @@ export default function Npm(props: any) {
                     :
                     <>
                         {process.map(p => {
-                            if (!p.id) {
-                                return <>
-                                    <Flex style={{marginBottom: '1.5em', marginTop: '1.5em'}}>
-                                        <Box ml="3">
-                                            <Text fontSize='2em' fontWeight="bold">
-                                            {p.result}
-                                                <StatusBadge status={p.status}></StatusBadge>
-                                            </Text>
-                                        </Box>
-                                    </Flex>
-                                    <Divider></Divider>
-                                </>
-                            } else {
-                                if (p.result == null) {
-                                    return <>
-                                    <Flex style={{marginBottom: '1.5em', marginTop: '1.5em'}}>
-                                        <Box ml="3">
-                                            <Text fontSize='2em' fontWeight="bold">
-                                            {p.application}
-                                                <StatusBadge status={p.status}></StatusBadge>
-                                                {/* <Badge ml="1" colorScheme="yellow">
-                                                    {p.status}
-                                                </Badge> */}
-                                            </Text>
-                                            <Text style={{marginBottom: '1em'}}>Id: <b>{p.id}</b></Text>
-                                            <Progress size="xs" isIndeterminate />
-                                        </Box>
-                                    </Flex>
-                                    <Divider></Divider>
-                                </>
-                                } else {
-                                    return <NpmResult p={p} showStatus={true}></NpmResult>
-                                }
-                            }
+                                return <NpmResult p={p}></NpmResult>
                         })}
                         <Button size={'sm'} onClick={BackToNpmVuln} style={{marginBottom: '2em'}}>Back to npm vulnerabilities</Button>
                     </>
@@ -262,3 +232,5 @@ export default function Npm(props: any) {
         </Flex>
     )
 }
+
+

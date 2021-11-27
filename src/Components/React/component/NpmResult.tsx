@@ -10,7 +10,7 @@ import {
     Collapse,
     StatGroup,
     useBoolean,
-    Stat, StatLabel, StatNumber, StatHelpText, StatArrow
+    Stat, StatLabel, StatNumber, StatHelpText, StatArrow, Progress
 } from '@chakra-ui/react';
 
 import SyntaxHighlighter from 'react-syntax-highlighter';
@@ -33,12 +33,7 @@ export function VulnerabilityStats({result}: {result: any}) {
                     {vulns.map((vulnKey, _) => (
                         <Stat>
                             <StatLabel>{vulnKey}</StatLabel>
-                            <StatNumber style={{marginTop: '0.5em'}}>{result.vulnerabilities[vulnKey.toLowerCase()]}</StatNumber>
-                            {console.log(result.vulnerabilities)}
-                            {/* <StatHelpText>
-                                <StatArrow type="increase" />
-                                X%
-                            </StatHelpText> */}
+                            <StatNumber style={{marginTop: '0.5em'}}>{result.vulnerabilities[vulnKey.toLowerCase()] ?? 0}</StatNumber>
                         </Stat>
                     ))}
                 </StatGroup>
@@ -56,28 +51,33 @@ export function VulnerabilityStats({result}: {result: any}) {
     </>)
 }
 
-export default function NpmResult({p, showStatus}: {p: npmStatus, showStatus?: boolean}) {
-/*
-critical: 0,
-high: 0,
-info: 0,
-low: 0,
-moderate: 0,
-total: 0
-*/
+export default function NpmResult({p}: {p: npmStatus}) {
     return (
         <>
         <Flex style={{marginBottom: '1.5em', marginTop: '1.5em'}}>
             <Box ml="3">
                 <Text fontSize='2em' fontWeight="bold">
-                    <b>{p.application}</b>
-                    {showStatus ?
-                        <StatusBadge status={p.status}></StatusBadge> 
-                        : ""
+                    {!p.id ? 
+                        <>
+                            {p.result}
+                            <StatusBadge status={p.status}></StatusBadge>
+                        </>
+                    :
+                        <>
+                            {p.application}
+                            <StatusBadge status={p.status}></StatusBadge>
+                        </>
                     }
                 </Text>
-                <Text style={{marginBottom: '1.5em'}}>Id: <b>{p.id}</b></Text>
-                <VulnerabilityStats result={p.result}></VulnerabilityStats>
+                {p.id ?
+                    <Text style={{marginBottom: '1em'}}>Id: <b>{p.id}</b></Text>
+                : <></>}
+                {!p.id && p.result == null ?
+                    <Progress size="xs" isIndeterminate />
+                : <></> }
+                {p.id && p.result ? 
+                    <VulnerabilityStats result={p.result}></VulnerabilityStats>
+                : <></>}
             </Box>
         </Flex>
         <Divider></Divider>

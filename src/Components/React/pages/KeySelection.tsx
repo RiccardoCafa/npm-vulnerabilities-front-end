@@ -20,15 +20,22 @@ import { SearchIcon, ArrowForwardIcon } from '@chakra-ui/icons';
 
 import { useHistory } from "react-router-dom";
 import '../../Sass/pages/KeySelection.sass';
+import axios from 'axios';
 
 interface RouteParams {
     flow: string;
 }
 
+interface Key {
+    key: string;
+}
+
 export default function KeySelection() {
     const { colorMode } = useColorMode();
-
+    
     let params = useParams<RouteParams>();
+
+    const [storedKey, setStoredKey] = useState<Key>();
 
     const [apiKey, setApiKey] = useState('');
     const [flow, setFlow] = useState('');
@@ -39,17 +46,22 @@ export default function KeySelection() {
 
     useEffect(() => {
         setFlow(params.flow);
+        
+        if (storedKey != undefined)
+            setStoredKey(storedKey);
     }, []);
 
-    function goTo(path: string) {
-        // TODO creates a key from cyber framework
-        console.log(`${path}/123e4567-e89b-12d3-a456-426655440000`);
-        history.push(`/${path}/123e4567-e89b-12d3-a456-426655440000`);
+    function goToWithNewKey(target: React.MouseEvent<HTMLButtonElement, MouseEvent>, path: string) {
+        target.preventDefault();
+        
+        getNewKey().then(key => {
+            history.push(`/${path}/${key.key}`);
+        })
     }
-
+    
     function goToWithKey(target: React.MouseEvent<HTMLButtonElement, MouseEvent>, path: string) {
         target.preventDefault();
-        console.log(path);
+
         history.push(`/${path}/${apiKey}`);
     }
 
@@ -59,6 +71,20 @@ export default function KeySelection() {
         setApiKey(key);
     }
 
+    async function getNewKey(): Promise<Key> {
+        var newKey: Key = { key: "" };
+
+        var resp = await axios.post("http://localhost:1323/users", {
+            headers: {
+                'Content-Type': 'application/json',
+                'accept': '*/*'
+            }
+        });
+        newKey = resp.data as Key;
+
+        return newKey;
+    }
+
     return(
         // alignContent: 'center', justifyContent: 'center',
         <Flex height={'100%'} style={{padding: '5em'}} align='center' justifyContent='center' direction={'column'}>
@@ -66,8 +92,8 @@ export default function KeySelection() {
                 <Text style={{fontWeight: 'bold', textAlign: 'center'}}>
                 first time here or want a new key? <br/> Click below to start!
                 </Text>
-                <Button onClick={() => goTo(flow)} backgroundColor={buttonBackground} rightIcon={<ArrowForwardIcon />} mt={4} isLoading={false} type="button"> 
-                npm vulnerability discover
+                <Button onClick={(e) => goToWithNewKey(e, flow)} backgroundColor={buttonBackground} rightIcon={<ArrowForwardIcon />} mt={4} isLoading={false} type="button"> 
+                new key for npm vulnerability discover
                 </Button>
             </Flex>
             <Divider style={{marginTop: '2em'}} orientation="horizontal" />

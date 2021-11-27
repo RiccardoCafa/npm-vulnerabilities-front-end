@@ -1,47 +1,28 @@
 import React, { useState, useEffect } from 'react';
 
 import {
-    Slider,
-    Text,
-    Badge,
-    Button,
-    Editable,
-    EditablePreview,
-    EditableInput,
-    Flex,
-    SliderTrack,
-    Box,
-    SliderThumb,
-    SliderFilledTrack,
-    Heading,
-    Link,
-    useBoolean,
-    Modal,
-    ModalOverlay,
-    ModalContent,
-    ModalHeader,
-    ModalBody,
-    ModalCloseButton,
-    ModalFooter,
-    Collapse,
-    Tooltip
+    Slider, Text, Badge, Button, Editable, EditablePreview, EditableInput, Flex, SliderTrack, Box, SliderThumb, SliderFilledTrack,
+    Heading, Link, useBoolean, Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalCloseButton, Tooltip
 } from '@chakra-ui/react';
 import fwQuestionData from '../data/fwQuestionData';
 import RatingExplain from './RatingExplain';
+import { Answer } from '../../React/data/userModel';
 
-export default function FwQuestion({data, color, myIndex, currentTabIndex}: {data: fwQuestionData[], color: string, myIndex: number, currentTabIndex: number}) {
+export default function FwQuestion({data, color, myIndex, currentTabIndex, answers: focusAnswers, updateAnswer}: 
+    {data: fwQuestionData[], color: string, myIndex: number, currentTabIndex: number, answers: Answer[], updateAnswer: (data: fwQuestionData) => void}) {
+    
     const [currentIndex, setCurrentIndex] = useState(0);
     const [currentQuestion, setCurrentQuestion] = useState<fwQuestionData>(
         {
             category: "",
             content: "",
             focus: "",
-            number: 1
+            id: 1,
+            rate: 2
         }
     );
 
     const [actualValue, setActualValue] = useState(2);
-
     const [showRatings, setShowRatings] = useBoolean();
     const [skippedAnswer, setSkippedAnswer] = useBoolean();
 
@@ -79,11 +60,18 @@ export default function FwQuestion({data, color, myIndex, currentTabIndex}: {dat
     ];
 
     useEffect(() => {
+        focusAnswers.map((answer, _) => {
+            var question = data.find(x => x.id == answer.id);
+            if (question) {
+                question.skipped = answer.skipped;
+            }
+        });
+
         if (data.length > 0) {
             setCurrentQuestion(data[currentIndex]);
         }
 
-    }, [data])
+    }, [data]);
 
     function goToQuestion(qst: string) {
         let qstNumber: number = parseInt(qst);
@@ -103,21 +91,54 @@ export default function FwQuestion({data, color, myIndex, currentTabIndex}: {dat
 
     function skipQuestion() {
         currentQuestion.skipped = true;
+        
         setCurrentQuestion({
             ...currentQuestion,
             skipped: true
         });
+
         goToQuestion((currentIndex + 2).toString());
     }
 
     function answerQuestion() {
         currentQuestion.skipped = false;
+        currentQuestion.rate = actualValue;
+
         setCurrentQuestion(currentQuestion);
         setSkippedAnswer.on();
+
+        updateAnswer(currentQuestion);
     }
 
     function onRatingChange(e: number) {
         setActualValue(e);
+    }
+
+    function getSlider() {
+        return (<Slider defaultValue={2} min={0} max={5} step={1} onChange={onRatingChange}>
+            <SliderTrack bg="red.100">
+                <Box position="relative" />
+                <SliderFilledTrack bg={color} />
+            </SliderTrack>
+            <Tooltip label={"rate of " + actualValue} isOpen placement='top'>
+                <SliderThumb bg={color} boxSize={6} />
+            </Tooltip>
+        </Slider>)
+    }
+
+    function getInfoModal() {
+        return (<Modal isOpen={showRatings} onClose={setShowRatings.toggle} size={'xl'}>
+            <ModalOverlay />
+            <ModalContent>
+            <ModalHeader>Rating meaning</ModalHeader>
+            <ModalCloseButton />
+            <ModalBody>
+                {ratingExplaination.map((rating) => 
+                    <RatingExplain rating={rating}></RatingExplain>
+                )}
+            </ModalBody>
+            </ModalContent>
+        </Modal>);
     }
 
     return (
@@ -127,9 +148,6 @@ export default function FwQuestion({data, color, myIndex, currentTabIndex}: {dat
         
             <Flex direction={'column'} display={'flex'} justifyContent={'center'} justifyItems={'center'} alignContent={'center'} alignItems={'center'} width={'80%'}>
                 <Flex direction={'row'} justifyContent={'space-around'} marginBottom={'2em'}>
-                    {/* <Heading>
-                    #{currentQuestion?.Number}
-                </Heading> */}
                     <Badge colorScheme={color.replace(/\..*$/g, '')} variant={'subtle'} fontWeight={'bold'} fontSize={'x-large'}>{currentQuestion?.category}</Badge>
                 </Flex>
                 <Heading size={'sm'} marginBottom={'0.5em'}>Evaluate how much this affirmation regards to your company</Heading>
@@ -141,16 +159,7 @@ export default function FwQuestion({data, color, myIndex, currentTabIndex}: {dat
                 {
                     currentQuestion.skipped ?
                     <Badge variant={'outline'}>Skipped</Badge>
-                    :
-                    <Slider defaultValue={2} min={0} max={5} step={1} onChange={onRatingChange}>
-                        <SliderTrack bg="red.100">
-                            <Box position="relative" />
-                            <SliderFilledTrack bg={color} />
-                        </SliderTrack>
-                        <Tooltip label={"rate of " + actualValue} isOpen placement='top'>
-                            <SliderThumb bg={color} boxSize={6} />
-                        </Tooltip>
-                    </Slider>
+                    : getSlider()
                 }
                 <Text size='sm' style={{marginTop: '1.2em'}}>
                     <Link color="teal.500" onClick={setShowRatings.toggle}>
@@ -164,13 +173,13 @@ export default function FwQuestion({data, color, myIndex, currentTabIndex}: {dat
                         <Button onClick={() => answerQuestion()}>ANSWER</Button>
                         : <Button onClick={() => skipQuestion()}>SKIP</Button>
                     }
-                    <Button onClick={() => goToQuestion((currentIndex + 2).toString())}>NEXT</Button>
+                    <Button onClick={() => goToQuestion((currentIndex + 2).toString())}>{currentQuestion.skipped ? "NEXT" : "ACCEPT"}</Button>
                 </Flex>
                 <Flex direction={'row'} width={'50%'} alignContent={'center'} justifyContent={'center'} >
                     <Text marginRight={'1em'}>
                         Question:
                     </Text>
-                    <Editable width={'10'} defaultValue="0" value={currentQuestion.number.toString()} onChange={(e) => goToQuestion(e)} >
+                    <Editable width={'10'} defaultValue="0" value={currentQuestion.id.toString()} onChange={(e) => goToQuestion(e)} >
                         <EditablePreview />
                         <EditableInput type={'number'} />
                     </Editable>
@@ -178,18 +187,7 @@ export default function FwQuestion({data, color, myIndex, currentTabIndex}: {dat
             </Flex>
         
         : <></>}
-        <Modal isOpen={showRatings} onClose={setShowRatings.toggle} size={'xl'}>
-            <ModalOverlay />
-            <ModalContent>
-            <ModalHeader>Rating meaning</ModalHeader>
-            <ModalCloseButton />
-            <ModalBody>
-                {ratingExplaination.map((rating) => 
-                    <RatingExplain rating={rating}></RatingExplain>
-                )}
-            </ModalBody>
-            </ModalContent>
-        </Modal>
+        {getInfoModal()}
         </>
     )
 }

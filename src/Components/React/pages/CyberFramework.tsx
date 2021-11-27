@@ -9,6 +9,8 @@ import {
     TabList,
     TabPanel,
     TabPanels,
+    Text,
+    Button
 } from '@chakra-ui/react';
 
 import '../../Sass/pages/Cyber.sass';
@@ -17,6 +19,8 @@ import fwQuestionData from '../data/fwQuestionData';
 
 import questionsData from '../../../mock/cve-form.json';
 import FwQuestion from '../component/FwQuestion';
+import useUser from '../../../Contexts/useUser';
+import axios from 'axios';
 
 interface RouteParams {
     apiKey: string;
@@ -24,9 +28,11 @@ interface RouteParams {
 
 export default function CyberMenu() {
 
-    const [apiKey, setApiKey] = useState('');
+    const [apiKeyValue, setApiKey] = useState('');
     const [questions, setQuestions] = useState<fwQuestionData[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
+    
+    const { answers, setUserState } = useUser();
 
     const questionTypes = [
         {
@@ -67,13 +73,30 @@ export default function CyberMenu() {
     const history = useHistory();
 
     useEffect(() => {
+        if (params.apiKey === "") {
+            params.apiKey = "5e3b54cb-d84c-4ac4-b663-dafab6470d56";
+        }
+
         setApiKey(params.apiKey);
 
         if (!params.apiKey) {
             history.push('keyselection/cyber');
         }
 
-        setQuestions(questionsData);
+        axios.get('http://localhost:1323/questions', {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }).then(resp => {
+            if (resp.data) {
+                setQuestions(resp.data as fwQuestionData[]);
+                console.log('questions: got data from server');
+            } else {
+                setQuestions(questionsData);
+                console.log('questions: got data from local server');
+            }
+        });
+
     }, []);
 
     function getQuestionByFocus(focus: string): fwQuestionData[] {
@@ -95,7 +118,25 @@ export default function CyberMenu() {
         setCurrentIndex(index);
     }
 
+    function updateQuestion(question: fwQuestionData) {
+        answers[question.id - 1].rate = question.rate ?? 0;
+        answers[question.id - 1].skipped = question.skipped;
+
+        setUserState({
+            answers: answers,
+            apiKey: apiKeyValue
+        });
+
+        console.log(answers);
+    }
+
+    function debugQuestion() {
+        console.log(answers);
+    }
+
     return (
+        <>
+        <Text style={{fontSize: '.7em', marginLeft: '.2em'}}>Key: {apiKeyValue}</Text>
         <Flex className="Container" style={{width: '100%'}}>
             <Tabs style={{width: '60vw'}} onChange={onIndexChange}>
                 <TabList style={{alignContent: 'center', justifyContent: 'center'}}>
@@ -106,11 +147,14 @@ export default function CyberMenu() {
                 <TabPanels>
                     {questionTypes.map((type, index) =>
                         <TabPanel display={'flex'} justifyContent={'center'}>
-                            <FwQuestion data={getQuestionByFocus(type.focus)} color={type.color} myIndex={index} currentTabIndex={currentIndex}></FwQuestion>
+                            <FwQuestion data={getQuestionByFocus(type.focus)} color={type.color} myIndex={index} currentTabIndex={currentIndex} 
+                                        answers={answers} updateAnswer={updateQuestion}></FwQuestion>
                         </TabPanel>
                     )}
                 </TabPanels>
             </Tabs>
+            <Button onClick={debugQuestion}></Button>
         </Flex>
+        </>
     )
 }
