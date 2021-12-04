@@ -30,7 +30,7 @@ const createWindow = () => {
 			click() {
 				mainWindow.loadURL(
 					isDev
-						? 'http://localhost:3000/keyselection/cyber'
+						? 'http://localhost:3000/keyselection/cyberchoose'
 						: `file://${path.join(__dirname, '../build/index.html')}`
 				)
 			}
