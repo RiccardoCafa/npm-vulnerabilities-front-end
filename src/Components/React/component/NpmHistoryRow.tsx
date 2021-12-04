@@ -15,12 +15,13 @@ export default function NpmHistoryRow({historia}: {historia: npmHistory}) {
 
     return (
         <>
+        {console.log(historia)}
             <Tr>
                 <Td>{historia.id}</Td>
                 <Td>{historia.application}</Td>
-                <Td>{historia.totalVulnerability}</Td>
+                <Td>{historia.result.vulnerabilities.total}</Td>
                 <Td><StatusBadge status={historia.status}></StatusBadge></Td>
-                {historia.totalVulnerability > 0 ? 
+                {historia.result.vulnerabilities.total > 0 ? 
                     <Td>
                         <Button colorScheme={'purple'} onClick={setShow.toggle}>{!show ? "Show" : "Hide"}</Button>
                     </Td> 

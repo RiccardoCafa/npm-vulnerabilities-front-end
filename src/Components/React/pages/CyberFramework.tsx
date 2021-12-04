@@ -8,7 +8,7 @@ import {
     Tabs,
     TabList,
     TabPanel,
-    TabPanels,
+    Spinner,
     Text,
     Button
 } from '@chakra-ui/react';
@@ -44,6 +44,7 @@ export default function CyberMenu() {
         focus: '',
         id: 0
     });
+    const [isLoading, setIsLoading] = useState(false);
 
     const { answers, setUserState } = useUser();
 
@@ -171,9 +172,6 @@ export default function CyberMenu() {
 
         setQuestionsAnswered(questionsAnsw);
         
-        console.log('update question');
-        console.log(questionsAnsw);
-
         var index = currentIndex + 1;
 
         if (index < questions.length) {
@@ -188,22 +186,55 @@ export default function CyberMenu() {
         }
     }
 
+    async function submitAnswer() {
+        var dataToSubmit: { id: number, rate: number }[] = [];
+
+        for(let key in questionsAnswered) {
+            const value = questionsAnswered[key];
+            if (!value.skipped) {
+                dataToSubmit.push({
+                    id: value.id,
+                    rate: value.rate ?? 0
+                });
+            }
+        }
+        
+        setUserState({
+            apiKey: apiKeyValue,
+            answers: dataToSubmit
+        });
+
+        setIsLoading(true);
+
+        await axios.post(`http://localhost:1323/answers/${apiKeyValue}`, dataToSubmit);
+
+        setIsLoading(false);
+
+        history.push(`/cyber/result/${apiKeyValue}`);
+    }
+
     return (
         <>
         <Text style={{fontSize: '.7em', marginLeft: '.2em'}}>Key: {apiKeyValue}</Text>
-        <Flex className="Container" style={{width: '100%'}}>
-            <div style={{display:'flex',flexDirection: 'column', justifyContent:'center'}}>
-                <Tabs style={{width: '60vw'}} index={currentTabIndex} onChange={onIndexChange} isManual>
-                    <TabList style={{alignContent: 'center', justifyContent: 'center'}}>
-                        {questionTypes.map((type, _) => 
-                            <Tab _selected={{ color: "white", bg: type.color }}>{type.focus}</Tab>
-                        )}
-                    </TabList>
-                </Tabs>
-                <FwQuestion data={currentQuestion} color={currentColor} showPrevious={currentIndex > 0} updateAnswer={updateQuestion} goPrevious={goPrevious}></FwQuestion>    
-            </div>
-            {/* <Button onClick={debugQuestion}></Button> */}
-        </Flex>
+        {isLoading ?
+            <Spinner></Spinner>
+            :
+            <>
+                <Flex className="Container" style={{width: '100%'}}>
+                    <div style={{display:'flex',flexDirection: 'column', justifyContent:'center'}}>
+                        <Tabs style={{width: '60vw'}} index={currentTabIndex} onChange={onIndexChange} isManual>
+                            <TabList style={{alignContent: 'center', justifyContent: 'center'}}>
+                                {questionTypes.map((type, _) => 
+                                    <Tab _selected={{ color: "white", bg: type.color }}>{type.focus}</Tab>
+                                )}
+                            </TabList>
+                        </Tabs>
+                        <FwQuestion data={currentQuestion} color={currentColor} showPrevious={currentIndex > 0} updateAnswer={updateQuestion} goPrevious={goPrevious}></FwQuestion>    
+                        <Button onClick={submitAnswer} color='green.700' marginTop='1em'>SUBMIT ALL ANSWERS</Button>
+                    </div>
+                </Flex>
+            </>
+        }
         </>
     )
 }

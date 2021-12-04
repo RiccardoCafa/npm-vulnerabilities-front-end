@@ -66,7 +66,6 @@ export default function Npm(props: any) {
         if (params.apiKey) {
             registerSocket(params);
         } else {
-            // TODO check cache if there is one stored, otherwise push to keyselection 
             history.push('keyselection/npm');
         }
 
@@ -126,13 +125,20 @@ export default function Npm(props: any) {
 
         let channel = socket.channel(`npm:${params.apiKey}`, {});
         channel.join()
-            .receive("ok", resp => {
-                console.log("success on receive", resp);
-            })
-            .receive("error", resp => {
-                console.log("Unable to join", resp);
-            });
+                .receive("ok", resp => {
+                    console.log("success on receive", resp);
+                })
+                .receive("error", resp => {
+                    console.log("Unable to join", resp);
+                });
 
+        channel.on("result", payload => {
+            console.log("Got message", payload);
+            // payload.result = JSON.parse(payload.result);
+            setReceived(payload);
+            // SetProcessFromSocket(payload);
+        })
+        
         channel.on("result", payload => {
             setReceived(payload);
         });
@@ -168,12 +174,12 @@ export default function Npm(props: any) {
     }
     
     function getHistory() {
-        //setProcessHistory(processHistoryMock);
+        // setProcessHistory(processHistoryMock);
     }
 
     function BackToNpmVuln() {
         setProcess([]);
-        getHistory();
+        // getHistory();
     }
 
     return (

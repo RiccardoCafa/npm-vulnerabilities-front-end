@@ -60,7 +60,7 @@ export default function Home() {
                             By clicking the button below, you will be redirected to a process of self-evaluation
                             for the institution that you belong.
                         </Text>
-                        <Button onClick={() => goTo('keyselection', 'cyber')}  float='left' style={{marginTop: '1em', marginRight: '1em', textTransform: 'uppercase'}}>
+                        <Button onClick={() => goTo('keyselection', 'cyberchoose')}  float='left' style={{marginTop: '1em', marginRight: '1em', textTransform: 'uppercase'}}>
                         Cyber Framework
                         </Button>
                     </GridItem>

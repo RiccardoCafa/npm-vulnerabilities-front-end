@@ -14,7 +14,7 @@ import {
     Tooltip,
     useColorMode,
     useColorModeValue
-  } from "@chakra-ui/react"
+} from "@chakra-ui/react"
 
 import { SearchIcon, ArrowForwardIcon } from '@chakra-ui/icons';
 

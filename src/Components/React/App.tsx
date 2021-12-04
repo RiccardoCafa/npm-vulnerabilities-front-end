@@ -16,6 +16,8 @@ import {
 } from 'react-router-dom';
 
 import theme from '../../theme';
+import CyberResult from './pages/CyberResult';
+import CyberChoose from './pages/CyberChoose';
 
 export default function App() {
 	
@@ -32,11 +34,17 @@ export default function App() {
 					<Route path="/keyselection/:flow">
 						<KeySelection></KeySelection>
 					</Route>
-					<Route path="/cyber/:apiKey">
+					<Route exact path="/cyber/:apiKey">
 						<Cyber></Cyber>
 					</Route>
 					<Route path="/npm/:apiKey?">
 						<Npm></Npm>
+					</Route>
+					<Route path="/cyber/result/:apiKey?">
+						<CyberResult></CyberResult>
+					</Route>
+					<Route path="/cyberchoose/:apiKey?">
+						<CyberChoose></CyberChoose>
 					</Route>
 				</Switch>
 			</div>
